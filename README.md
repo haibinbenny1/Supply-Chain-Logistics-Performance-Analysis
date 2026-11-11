@@ -1,25 +1,37 @@
-# Supply-Chain-Logistics-Performance-Analysis
-
-# Excel Data Cleaning and Preparation
+# Supply Chain & Logistics Performance Analysis
 
 ## 1. Project Overview
 
-Used Microsoft Excel Power Query Editor to clean and prepare a Supply Chain and Logistics dataset before importing it into Power BI.
+This project focuses on cleaning and analysing supply chain and logistics data using Microsoft Excel and Power BI.
 
-The main tasks included removing unnecessary columns, checking data quality, correcting data types, investigating duplicates, validating shipping dates, and creating new columns to analyse delivery performance.
+I started with a raw CSV dataset, cleaned and prepared it using Excel Power Query Editor, and then imported the cleaned data into Power BI for further analysis.
+
+The project covers data cleaning, data validation, duplicate investigation, shipping performance analysis, DAX calculations and interactive dashboard development.
 
 ## 2. Tools Used
 
 - Microsoft Excel
 - Power Query Editor
+- Microsoft Power BI
+- DAX (Data Analysis Expressions)
 
-## 3. Data Import and Inspection
+## 3. Dataset Information
+
+**Original Dataset:** `incom2024_delay_example_dataset.csv`
+
+The dataset contains information about orders, customers, products, sales, profit, discounts, shipping dates, shipping methods and geographical markets.
+
+---
+
+# Part 1: Excel Data Cleaning and Preparation
+
+## 4. Data Import and Inspection
 
 - Imported the original CSV file into Power Query Editor.
 - Checked the dataset structure and column names.
-- Used Column Quality, Column Distribution, and Column Profile to inspect missing values, errors, and distinct values.
+- Used Column Quality, Column Distribution and Column Profile to inspect missing values, errors and distinct values.
 
-## 4. Removing Unnecessary Columns
+## 5. Removing Unnecessary Columns
 
 Removed 5 columns that were not required for the analysis:
 
@@ -31,16 +43,16 @@ Removed 5 columns that were not required for the analysis:
 
 Rearranged the remaining columns into logical groups for easier analysis.
 
-## 5. Data Type Correction
+## 6. Data Type Correction
 
 - Converted `order_date` and `shipping_date` to Date.
-- Checked numerical columns such as price, sales, quantity, and discount.
+- Checked numerical columns such as price, sales, quantity and discount.
 - Reviewed categorical columns and their data types.
 - Checked ID columns for consistency.
 
-## 6. Data Quality Checks
+## 7. Data Quality Checks
 
-Checked the dataset for missing values, errors, and unusual numerical values.
+Checked the dataset for missing values, errors and unusual numerical values.
 
 The following columns were validated:
 
@@ -50,13 +62,13 @@ The following columns were validated:
 - `order_item_quantity`
 - `order_item_discount_rate`
 
-Checked for negative and zero prices, sales, and quantities, along with discount rates outside the 0–1 range.
+Checked for negative and zero prices, sales and quantities, along with discount rates outside the 0–1 range.
 
 No records matching these validation conditions were found.
 
 Negative profit values were retained because they can represent genuine business losses.
 
-## 7. Duplicate and ID Validation
+## 8. Duplicate and ID Validation
 
 - Checked repeated values in `order_item_id`.
 - Found 6 distinct IDs with repeated occurrences.
@@ -66,7 +78,7 @@ Negative profit values were retained because they can represent genuine business
 
 Kept the original records instead of deleting them.
 
-## 8. Date Validation
+## 9. Date Validation
 
 Created a custom column called `Date Validation` to identify records where the shipping date was earlier than the order date.
 
@@ -86,7 +98,7 @@ else "valid"
 
 Invalid date records were retained for further analysis.
 
-## 9. Shipping Days Calculation
+## 10. Shipping Days Calculation
 
 Created a custom column called `Shipping Days` to calculate the number of days between the order date and shipping date.
 
@@ -96,7 +108,7 @@ Created a custom column called `Shipping Days` to calculate the number of days b
 Duration.Days([shipping_date] - [order_date])
 ```
 
-## 10. Clean Shipping Days
+## 11. Clean Shipping Days
 
 Created another column called `Clean Shipping Days` to replace negative shipping durations with null values.
 
@@ -109,14 +121,14 @@ else [Shipping Days]
 
 The original `Shipping Days` column was preserved.
 
-## 11. Shipping Performance Classification
+## 12. Shipping Performance Classification
 
-Created a custom column called `Shipping Performance` to classify orders based on shipping duration.
+Created a custom column called `Shipping Performance` to classify records based on shipping duration.
 
 **Formula:**
 
 ```powerquery
-if [Clean Shipping Days] = null then "invalid Date"
+if [Clean Shipping Days] = null then "Invalid Date"
 else if [Clean Shipping Days] <= 7 then "Fast Delivery"
 else if [Clean Shipping Days] <= 30 then "Normal Delivery"
 else "Delayed Delivery"
@@ -130,9 +142,9 @@ else "Delayed Delivery"
 | Invalid Date | 5,941 |
 | Total | 15,549 |
 
-The 7-day and 30-day limits were selected for this project.
+The 7-day and 30-day limits were selected for this project and are not official industry standards.
 
-## 12. Categorical Data Analysis
+## 13. Categorical Data Analysis
 
 Created separate Reference queries in Power Query and used Group By and Count Rows to analyse:
 
@@ -149,7 +161,7 @@ Created separate Reference queries in Power Query and used Group By and Count Ro
 
 This helped understand the distribution of orders and other categories in the dataset.
 
-## 13. Final Dataset Summary
+## 14. Final Excel Dataset Summary
 
 | Description | Result |
 |---|---:|
@@ -169,17 +181,20 @@ This helped understand the distribution of orders and other categories in the da
 
 All 15,549 original records were retained.
 
-## 14. Power BI – Data Import and Preparation
+---
 
-After completing the data cleaning in Excel, imported the final cleaned dataset into Power BI Desktop.
+# Part 2: Power BI Data Analysis
 
-- Imported the cleaned Excel workbook.
-- Selected the `incom2024_delay_example_dataset` table.
-- Checked the columns and data types.
+## 15. Data Import and Preparation
+
+After completing the data cleaning in Excel, imported the final cleaned workbook into Power BI Desktop.
+
+- Selected the final `incom2024_delay_example_dataset` table.
+- Checked the imported columns and data types.
 - Applied the changes using Close & Apply.
-- Verified the imported data in Data View.
+- Verified the dataset in Power BI Data View.
 
-## 15. Date Table and Data Modeling
+## 16. Date Table and Data Modeling
 
 Created a separate Date Table using DAX for time-based analysis.
 
@@ -209,6 +224,8 @@ The Date Table includes:
 - Quarter
 - Year Month
 
+### Relationship
+
 Created a relationship between the Date Table and the main dataset.
 
 | Setting | Value |
@@ -223,11 +240,11 @@ Created a relationship between the Date Table and the main dataset.
 
 Also marked the Date Table as a Date Table in Power BI.
 
-## 16. Calculated Columns – DAX
+## 17. Calculated Columns – DAX
 
 Created three calculated columns for additional analysis.
 
-### 16.1 Category Type
+### 17.1 Category Type
 
 Combined product category and department name.
 
@@ -238,7 +255,7 @@ Category Type =
     & 'incom2024_delay_example_dataset'[department_name]
 ```
 
-### 16.2 Revenue per Order
+### 17.2 Revenue per Order
 
 Calculated revenue using product price and quantity.
 
@@ -248,7 +265,7 @@ Revenue per Order =
     * 'incom2024_delay_example_dataset'[order_item_quantity]
 ```
 
-### 16.3 Sales Category
+### 17.3 Sales Category
 
 Compared product prices with the overall average product price.
 
@@ -265,9 +282,9 @@ IF(
 )
 ```
 
-## 17. DAX Measures
+## 18. DAX Measures
 
-Created the following measures to calculate important sales and logistics metrics.
+Created the following measures to calculate sales, profit, orders and shipping metrics.
 
 ### Order Count
 
@@ -350,11 +367,11 @@ TOTALYTD(
 )
 ```
 
-## 18. Power BI Dashboard
+## 19. Power BI Dashboard
 
 Created a single-page dashboard named **Supply Chain & Logistics Performance Analysis**.
 
-### 18.1 KPI Cards
+### 19.1 KPI Cards
 
 Added four KPI cards to display the main metrics:
 
@@ -363,7 +380,7 @@ Added four KPI cards to display the main metrics:
 3. Total Orders
 4. Profit Margin %
 
-### 18.2 Data Visualizations
+### 19.2 Data Visualizations
 
 Created six charts to analyse different areas of the dataset.
 
@@ -376,7 +393,7 @@ Created six charts to analyse different areas of the dataset.
 | Sales by Customer Segment | Clustered Bar Chart |
 | Sales by Shipping Mode | Clustered Column Chart |
 
-### 18.3 Interactive Slicers
+### 19.3 Interactive Slicers
 
 Added four slicers to filter the dashboard:
 
@@ -387,17 +404,17 @@ Added four slicers to filter the dashboard:
 
 These filters allow users to explore sales and logistics performance based on different dates, markets, customer groups and shipping methods.
 
-### 18.4 Dashboard Design
+### 19.4 Dashboard Design
 
 - Created a single-page dashboard.
 - Used a blue background with contrasting chart panels.
 - Arranged four KPI cards at the top.
 - Added six charts in a two-row layout.
 - Added slicers in a separate filter panel.
-- Used percentage formatting for Profit Margin.
+- Formatted Profit Margin as a percentage.
 
-## 19. Final Outcome
+## 20. Final Project Outcome
 
 Completed the Excel data cleaning and Power BI analysis using the prepared supply chain dataset.
 
-The final dashboard brings together sales, profit, customer and shipping information, allowing users to explore different areas of supply chain performance through charts and interactive filters.
+The final dashboard brings together sales, profit, customer and shipping information in one place, making it easier to explore the dataset and compare performance using charts and interactive filters.
