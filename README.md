@@ -169,3 +169,235 @@ This helped understand the distribution of orders and other categories in the da
 
 All 15,549 original records were retained.
 
+## 14. Power BI – Data Import and Preparation
+
+After completing the data cleaning in Excel, imported the final cleaned dataset into Power BI Desktop.
+
+- Imported the cleaned Excel workbook.
+- Selected the `incom2024_delay_example_dataset` table.
+- Checked the columns and data types.
+- Applied the changes using Close & Apply.
+- Verified the imported data in Data View.
+
+## 15. Date Table and Data Modeling
+
+Created a separate Date Table using DAX for time-based analysis.
+
+**DAX Formula:**
+
+```dax
+Date Table =
+ADDCOLUMNS(
+    CALENDAR(
+        MIN('incom2024_delay_example_dataset'[order_date]),
+        MAX('incom2024_delay_example_dataset'[order_date])
+    ),
+    "Year", YEAR([Date]),
+    "Month Number", MONTH([Date]),
+    "Month", FORMAT([Date], "MMMM"),
+    "Quarter", "Q" & FORMAT([Date], "Q"),
+    "Year Month", FORMAT([Date], "YYYY-MM")
+)
+```
+
+The Date Table includes:
+
+- Date
+- Year
+- Month Number
+- Month
+- Quarter
+- Year Month
+
+Created a relationship between the Date Table and the main dataset.
+
+| Setting | Value |
+|---|---|
+| First Table | Date Table |
+| First Column | Date |
+| Second Table | incom2024_delay_example_dataset |
+| Second Column | order_date |
+| Cardinality | One-to-Many (1:*) |
+| Cross-filter Direction | Single |
+| Relationship | Active |
+
+Also marked the Date Table as a Date Table in Power BI.
+
+## 16. Calculated Columns – DAX
+
+Created three calculated columns for additional analysis.
+
+### 16.1 Category Type
+
+Combined product category and department name.
+
+```dax
+Category Type =
+'incom2024_delay_example_dataset'[category_name]
+    & " - "
+    & 'incom2024_delay_example_dataset'[department_name]
+```
+
+### 16.2 Revenue per Order
+
+Calculated revenue using product price and quantity.
+
+```dax
+Revenue per Order =
+'incom2024_delay_example_dataset'[order_item_product_price]
+    * 'incom2024_delay_example_dataset'[order_item_quantity]
+```
+
+### 16.3 Sales Category
+
+Compared product prices with the overall average product price.
+
+```dax
+Sales Category =
+IF(
+    'incom2024_delay_example_dataset'[order_item_product_price]
+        > CALCULATE(
+            AVERAGE('incom2024_delay_example_dataset'[order_item_product_price]),
+            ALL('incom2024_delay_example_dataset')
+        ),
+    "Above Average",
+    "Below Average"
+)
+```
+
+## 17. DAX Measures
+
+Created the following measures to calculate important sales and logistics metrics.
+
+### Order Count
+
+```dax
+Order Count =
+COUNT('incom2024_delay_example_dataset'[order_id])
+```
+
+### Total Orders
+
+```dax
+Total Orders =
+DISTINCTCOUNT('incom2024_delay_example_dataset'[order_id])
+```
+
+### Total Sales
+
+```dax
+Total Sales =
+SUM('incom2024_delay_example_dataset'[sales])
+```
+
+### Total Profit
+
+```dax
+Total Profit =
+SUM('incom2024_delay_example_dataset'[order_profit_per_order])
+```
+
+### Total Quantity
+
+```dax
+Total Quantity =
+SUM('incom2024_delay_example_dataset'[order_item_quantity])
+```
+
+### Average Shipping Days
+
+```dax
+Average Shipping Days =
+AVERAGE('incom2024_delay_example_dataset'[Clean Shipping Days])
+```
+
+### Profit Margin %
+
+```dax
+Profit Margin % =
+DIVIDE([Total Profit], [Total Sales], 0)
+```
+
+Formatted this measure as a percentage in Power BI.
+
+### Total Discount
+
+```dax
+Total Discount =
+SUMX(
+    'incom2024_delay_example_dataset',
+    'incom2024_delay_example_dataset'[order_item_discount]
+)
+```
+
+### Average Profit in Delhi
+
+```dax
+Average Profit in Delhi =
+CALCULATE(
+    AVERAGE('incom2024_delay_example_dataset'[order_profit_per_order]),
+    'incom2024_delay_example_dataset'[order_city] = "Delhi"
+)
+```
+
+### YTD Sales
+
+```dax
+YTD Sales =
+TOTALYTD(
+    SUM('incom2024_delay_example_dataset'[sales]),
+    'Date Table'[Date]
+)
+```
+
+## 18. Power BI Dashboard
+
+Created a single-page dashboard named **Supply Chain & Logistics Performance Analysis**.
+
+### 18.1 KPI Cards
+
+Added four KPI cards to display the main metrics:
+
+1. Total Sales
+2. Total Profit
+3. Total Orders
+4. Profit Margin %
+
+### 18.2 Data Visualizations
+
+Created six charts to analyse different areas of the dataset.
+
+| Chart | Visualization Type |
+|---|---|
+| Monthly Sales Trend | Line Chart |
+| Profit by Market | Donut Chart |
+| Sales by Product Category | Clustered Bar Chart |
+| Shipping Performance Analysis | Clustered Column Chart |
+| Sales by Customer Segment | Clustered Bar Chart |
+| Sales by Shipping Mode | Clustered Column Chart |
+
+### 18.3 Interactive Slicers
+
+Added four slicers to filter the dashboard:
+
+- Date
+- Market
+- Customer Segment
+- Shipping Mode
+
+These filters allow users to explore sales and logistics performance based on different dates, markets, customer groups and shipping methods.
+
+### 18.4 Dashboard Design
+
+- Created a single-page dashboard.
+- Used a blue background with contrasting chart panels.
+- Arranged four KPI cards at the top.
+- Added six charts in a two-row layout.
+- Added slicers in a separate filter panel.
+- Used percentage formatting for Profit Margin.
+
+## 19. Final Outcome
+
+Completed the Excel data cleaning and Power BI analysis using the prepared supply chain dataset.
+
+The final dashboard brings together sales, profit, customer and shipping information, allowing users to explore different areas of supply chain performance through charts and interactive filters.
