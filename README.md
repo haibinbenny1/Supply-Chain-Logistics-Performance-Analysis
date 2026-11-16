@@ -2,151 +2,82 @@
 
 ## 1. Project Overview
 
-This project focuses on cleaning and analysing supply chain and logistics data using Microsoft Excel and Power BI.
+This project focuses on analysing supply chain and logistics performance using Excel, Power Query and Power BI.
 
-I started with a raw CSV dataset, cleaned and prepared it using Excel Power Query Editor, and then imported the cleaned data into Power BI for further analysis.
-
-The project covers data cleaning, data validation, duplicate investigation, shipping performance analysis, DAX calculations and interactive dashboard development.
+The main objective was to clean and prepare the dataset, analyse sales and delivery performance, and build interactive dashboards to understand business performance and identify areas that need improvement.
 
 ## 2. Tools Used
 
 - Microsoft Excel
 - Power Query Editor
-- Microsoft Power BI
+- Power BI
 - DAX (Data Analysis Expressions)
 
 ## 3. Dataset Information
 
-**Original Dataset:** `incom2024_delay_example_dataset.csv`
+- Dataset: Supply Chain & Logistics Performance
+- Total Records: 15,549
+- Original Columns: 37
+- Columns Removed: 5
+- Original Columns Retained: 32
+- New Columns Created: 4
+- Final Columns: 36
 
-The dataset contains information about orders, customers, products, sales, profit, discounts, shipping dates, shipping methods and geographical markets.
+# Part 1: Excel Data Cleaning
 
----
+## 4. Data Import
 
-# Part 1: Excel Data Cleaning and Preparation
-
-## 4. Data Import and Inspection
-
-- Imported the original CSV file into Power Query Editor.
-- Checked the dataset structure and column names.
-- Used Column Quality, Column Distribution and Column Profile to inspect missing values, errors and distinct values.
+Imported the original dataset into Excel Power Query Editor for data cleaning and transformation.
 
 ## 5. Removing Unnecessary Columns
 
-Removed 5 columns that were not required for the analysis:
+Removed the following columns because they were not required for the analysis:
 
-1. `latitude`
-2. `longitude`
-3. `product_card_id`
-4. `category_id`
-5. `department_id`
-
-Rearranged the remaining columns into logical groups for easier analysis.
+- latitude
+- longitude
+- product_card_id
+- category_id
+- department_id
 
 ## 6. Data Type Correction
 
-- Converted `order_date` and `shipping_date` to Date.
+Reviewed and corrected the data types of the columns.
+
+- Converted order_date and shipping_date into Date format.
 - Checked numerical columns such as price, sales, quantity and discount.
-- Reviewed categorical columns and their data types.
-- Checked ID columns for consistency.
+- Converted ID columns into Text format where appropriate.
 
-## 7. Data Quality Checks
+## 7. Duplicate Analysis
 
-Checked the dataset for missing values, errors and unusual numerical values.
+Performed duplicate analysis using order_id and order_item_id.
 
-The following columns were validated:
+Identified repeated records and reviewed their order statuses. The records were retained because they represented different order statuses rather than confirmed duplicate transactions.
 
-- `product_price`
-- `order_item_product_price`
-- `sales`
-- `order_item_quantity`
-- `order_item_discount_rate`
+## 8. Data Transformation
 
-Checked for negative and zero prices, sales and quantities, along with discount rates outside the 0–1 range.
+Created four new columns to support the analysis:
 
-No records matching these validation conditions were found.
+1. **Date Validation** – Identified valid and invalid date records.
+2. **Shipping Days** – Calculated the number of days between order date and shipping date.
+3. **Clean Shipping Days** – Replaced negative shipping durations with null values.
+4. **Shipping Performance** – Classified delivery records based on shipping duration.
 
-Negative profit values were retained because they can represent genuine business losses.
+## 9. Shipping Performance Classification
 
-## 8. Duplicate and ID Validation
+Used the following conditions to classify shipping performance:
 
-- Checked repeated values in `order_item_id`.
-- Found 6 distinct IDs with repeated occurrences.
-- Grouped records using `order_id` and `order_item_id`.
-- Found one repeated combination: `order_id = 1` and `order_item_id = 1`.
-- Inspected the records and found different order statuses.
+- Fast Delivery: Up to 7 days
+- Normal Delivery: 8–30 days
+- Delayed Delivery: More than 30 days
+- Invalid Date: Records with invalid dates
 
-Kept the original records instead of deleting them.
+These thresholds were defined for this project to support delivery performance analysis.
 
-## 9. Date Validation
+## 10. Data Profiling and Reference Queries
 
-Created a custom column called `Date Validation` to identify records where the shipping date was earlier than the order date.
+Used data profiling and Group By operations to understand the dataset.
 
-**Formula:**
-
-```powerquery
-if [shipping_date] < [order_date]
-then "invalid"
-else "valid"
-```
-
-| Status | Records |
-|---|---:|
-| Valid | 9,608 |
-| Invalid | 5,941 |
-| Total | 15,549 |
-
-Invalid date records were retained for further analysis.
-
-## 10. Shipping Days Calculation
-
-Created a custom column called `Shipping Days` to calculate the number of days between the order date and shipping date.
-
-**Formula:**
-
-```powerquery
-Duration.Days([shipping_date] - [order_date])
-```
-
-## 11. Clean Shipping Days
-
-Created another column called `Clean Shipping Days` to replace negative shipping durations with null values.
-
-**Formula:**
-
-```powerquery
-if [Shipping Days] < 0 then null
-else [Shipping Days]
-```
-
-The original `Shipping Days` column was preserved.
-
-## 12. Shipping Performance Classification
-
-Created a custom column called `Shipping Performance` to classify records based on shipping duration.
-
-**Formula:**
-
-```powerquery
-if [Clean Shipping Days] = null then "Invalid Date"
-else if [Clean Shipping Days] <= 7 then "Fast Delivery"
-else if [Clean Shipping Days] <= 30 then "Normal Delivery"
-else "Delayed Delivery"
-```
-
-| Shipping Category | Records |
-|---|---:|
-| Fast Delivery | 1,167 |
-| Normal Delivery | 2,643 |
-| Delayed Delivery | 5,798 |
-| Invalid Date | 5,941 |
-| Total | 15,549 |
-
-The 7-day and 30-day limits were selected for this project and are not official industry standards.
-
-## 13. Categorical Data Analysis
-
-Created separate Reference queries in Power Query and used Group By and Count Rows to analyse:
+Created categorical reference queries for:
 
 - Label
 - Order Status
@@ -159,9 +90,7 @@ Created separate Reference queries in Power Query and used Group By and Count Ro
 - Date Validation
 - Shipping Performance
 
-This helped understand the distribution of orders and other categories in the dataset.
-
-## 14. Final Excel Dataset Summary
+## 11. Final Dataset Summary
 
 | Description | Result |
 |---|---:|
@@ -169,252 +98,135 @@ This helped understand the distribution of orders and other categories in the da
 | Original Columns | 37 |
 | Columns Removed | 5 |
 | Original Columns Retained | 32 |
-| New Calculated Columns | 4 |
+| New Columns Created | 4 |
 | Final Columns | 36 |
 
-**New columns created:**
+### Date Validation Results
 
-1. `Date Validation`
-2. `Shipping Days`
-3. `Clean Shipping Days`
-4. `Shipping Performance`
+| Status | Records |
+|---|---:|
+| Valid | 9,608 |
+| Invalid | 5,941 |
 
-All 15,549 original records were retained.
+### Shipping Performance Results
 
----
+| Category | Records |
+|---|---:|
+| Fast Delivery | 1,167 |
+| Normal Delivery | 2,643 |
+| Delayed Delivery | 5,798 |
+| Invalid Date | 5,941 |
 
-# Part 2: Power BI Data Analysis
+# Part 2: Power BI Analysis
 
-## 15. Data Import and Preparation
+## 12. Data Import and Data Modelling
 
-After completing the data cleaning in Excel, imported the final cleaned workbook into Power BI Desktop.
+Imported the cleaned Excel dataset into Power BI.
 
-- Selected the final `incom2024_delay_example_dataset` table.
-- Checked the imported columns and data types.
-- Applied the changes using Close & Apply.
-- Verified the dataset in Power BI Data View.
+Created a separate Date Table using DAX for date-based analysis.
 
-## 16. Date Table and Data Modeling
+Connected the Date Table to the main dataset using the order_date column.
 
-Created a separate Date Table using DAX for time-based analysis.
+Configured the relationship as:
+- One-to-many relationship
+- Single cross-filter direction
+- Active relationship
 
-**DAX Formula:**
+Marked the Date Table as the official Date Table in Power BI.
 
-```dax
-Date Table =
-ADDCOLUMNS(
-    CALENDAR(
-        MIN('incom2024_delay_example_dataset'[order_date]),
-        MAX('incom2024_delay_example_dataset'[order_date])
-    ),
-    "Year", YEAR([Date]),
-    "Month Number", MONTH([Date]),
-    "Month", FORMAT([Date], "MMMM"),
-    "Quarter", "Q" & FORMAT([Date], "Q"),
-    "Year Month", FORMAT([Date], "YYYY-MM")
-)
-```
+## 13. Calculated Columns
 
-The Date Table includes:
+Created the following calculated columns using DAX:
 
-- Date
-- Year
-- Month Number
-- Month
-- Quarter
-- Year Month
+- Category Type
+- Revenue per Order
+- Sales Category
 
-### Relationship
+These columns were used to support category analysis and sales comparisons.
 
-Created a relationship between the Date Table and the main dataset.
+## 14. DAX Measures
 
-| Setting | Value |
-|---|---|
-| First Table | Date Table |
-| First Column | Date |
-| Second Table | incom2024_delay_example_dataset |
-| Second Column | order_date |
-| Cardinality | One-to-Many (1:*) |
-| Cross-filter Direction | Single |
-| Relationship | Active |
+Created measures to calculate important business metrics:
 
-Also marked the Date Table as a Date Table in Power BI.
+- Order Count
+- Total Orders
+- Total Sales
+- Total Profit
+- Total Quantity
+- Average Shipping Days
+- Profit Margin %
+- Total Discount
+- Average Profit in Delhi
+- YTD Sales
+- Fast Delivery Records
+- Delayed Delivery Records
+- Invalid Shipping Records
 
-## 17. Calculated Columns – DAX
+## 15. Dashboard 1 – Executive Overview
 
-Created three calculated columns for additional analysis.
+Created the Executive Overview dashboard to provide a summary of overall business performance.
 
-### 17.1 Category Type
+### KPI Cards
 
-Combined product category and department name.
+- Total Sales
+- Total Profit
+- Total Orders
+- Profit Margin
 
-```dax
-Category Type =
-'incom2024_delay_example_dataset'[category_name]
-    & " - "
-    & 'incom2024_delay_example_dataset'[department_name]
-```
+### Visualizations
 
-### 17.2 Revenue per Order
+1. Monthly Sales Trend – Line Chart
+2. Profit by Market – Donut Chart
+3. Sales by Product Category – Clustered Bar Chart
+4. Shipping Performance Analysis – Clustered Column Chart
+5. Sales by Customer Segment – Clustered Bar Chart
+6. Sales by Shipping Mode – Clustered Column Chart
 
-Calculated revenue using product price and quantity.
-
-```dax
-Revenue per Order =
-'incom2024_delay_example_dataset'[order_item_product_price]
-    * 'incom2024_delay_example_dataset'[order_item_quantity]
-```
-
-### 17.3 Sales Category
-
-Compared product prices with the overall average product price.
-
-```dax
-Sales Category =
-IF(
-    'incom2024_delay_example_dataset'[order_item_product_price]
-        > CALCULATE(
-            AVERAGE('incom2024_delay_example_dataset'[order_item_product_price]),
-            ALL('incom2024_delay_example_dataset')
-        ),
-    "Above Average",
-    "Below Average"
-)
-```
-
-## 18. DAX Measures
-
-Created the following measures to calculate sales, profit, orders and shipping metrics.
-
-### Order Count
-
-```dax
-Order Count =
-COUNT('incom2024_delay_example_dataset'[order_id])
-```
-
-### Total Orders
-
-```dax
-Total Orders =
-DISTINCTCOUNT('incom2024_delay_example_dataset'[order_id])
-```
-
-### Total Sales
-
-```dax
-Total Sales =
-SUM('incom2024_delay_example_dataset'[sales])
-```
-
-### Total Profit
-
-```dax
-Total Profit =
-SUM('incom2024_delay_example_dataset'[order_profit_per_order])
-```
-
-### Total Quantity
-
-```dax
-Total Quantity =
-SUM('incom2024_delay_example_dataset'[order_item_quantity])
-```
-
-### Average Shipping Days
-
-```dax
-Average Shipping Days =
-AVERAGE('incom2024_delay_example_dataset'[Clean Shipping Days])
-```
-
-### Profit Margin %
-
-```dax
-Profit Margin % =
-DIVIDE([Total Profit], [Total Sales], 0)
-```
-
-Formatted this measure as a percentage in Power BI.
-
-### Total Discount
-
-```dax
-Total Discount =
-SUMX(
-    'incom2024_delay_example_dataset',
-    'incom2024_delay_example_dataset'[order_item_discount]
-)
-```
-
-### Average Profit in Delhi
-
-```dax
-Average Profit in Delhi =
-CALCULATE(
-    AVERAGE('incom2024_delay_example_dataset'[order_profit_per_order]),
-    'incom2024_delay_example_dataset'[order_city] = "Delhi"
-)
-```
-
-### YTD Sales
-
-```dax
-YTD Sales =
-TOTALYTD(
-    SUM('incom2024_delay_example_dataset'[sales]),
-    'Date Table'[Date]
-)
-```
-
-## 19. Power BI Dashboard
-
-Created a single-page dashboard named **Supply Chain & Logistics Performance Analysis**.
-
-### 19.1 KPI Cards
-
-Added four KPI cards to display the main metrics:
-
-1. Total Sales
-2. Total Profit
-3. Total Orders
-4. Profit Margin %
-
-### 19.2 Data Visualizations
-
-Created six charts to analyse different areas of the dataset.
-
-| Chart | Visualization Type |
-|---|---|
-| Monthly Sales Trend | Line Chart |
-| Profit by Market | Donut Chart |
-| Sales by Product Category | Clustered Bar Chart |
-| Shipping Performance Analysis | Clustered Column Chart |
-| Sales by Customer Segment | Clustered Bar Chart |
-| Sales by Shipping Mode | Clustered Column Chart |
-
-### 19.3 Interactive Slicers
-
-Added four slicers to filter the dashboard:
+### Slicers
 
 - Date
-- Market
-- Customer Segment
 - Shipping Mode
+- Customer Segment
+- Market
 
-These filters allow users to explore sales and logistics performance based on different dates, markets, customer groups and shipping methods.
+## 16. Dashboard 2 – Shipping & Logistics Analysis
 
-### 19.4 Dashboard Design
+Created a separate dashboard focused on shipping duration and delivery performance.
 
-- Created a single-page dashboard.
-- Used a blue background with contrasting chart panels.
-- Arranged four KPI cards at the top.
-- Added six charts in a two-row layout.
-- Added slicers in a separate filter panel.
-- Formatted Profit Margin as a percentage.
+### KPI Cards
 
-## 20. Final Project Outcome
+- Average Shipping Days
+- Fast Delivery Records
+- Delayed Delivery Records
+- Invalid Shipping Records
 
-Completed the Excel data cleaning and Power BI analysis using the prepared supply chain dataset.
+### Visualizations
 
-The final dashboard brings together sales, profit, customer and shipping information in one place, making it easier to explore the dataset and compare performance using charts and interactive filters.
+1. **Shipping Mode Performance Comparison** – Line and Clustered Column Chart
+2. **Shipping Performance Breakdown** – Donut Chart
+3. **Shipping Performance by Department** – Ribbon Chart
+4. **Shipping Performance by Market** – Stacked Column Chart
+5. **Average Shipping Days by Market** – Clustered Bar Chart
+6. **Shipping Performance by Shipping Mode** – 100% Stacked Bar Chart
+
+The dashboard helps compare shipping performance across different markets, departments and shipping modes.
+
+## 17. Dashboard Design
+
+Used a consistent design across both dashboard pages.
+
+- Applied a blue background theme.
+- Used separate colour combinations for KPI cards and charts.
+- Added clear chart titles.
+- Arranged visuals to make the dashboards easy to understand.
+
+## 18. Final Project Outcome
+
+Completed the data cleaning, transformation, modelling and visualization process using Excel, Power Query and Power BI.
+
+The project contains two interactive dashboard pages:
+
+1. Executive Overview
+2. Shipping & Logistics Analysis
+
+This project helped me gain practical experience in data cleaning, data transformation, data modelling, DAX calculations and dashboard development using a supply chain and logistics dataset.
